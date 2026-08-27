@@ -191,6 +191,74 @@ box-shadow:0 0 0 3px var(--blue-100);
 outline:2px solid var(--blue-600);
 outline-offset:2px;
 }
+.checktable{
+border:1px solid var(--line);
+border-radius:var(--r-md);
+padding:6px 14px 12px;
+margin:0;
+min-width:0;
+}
+.checktable legend{
+font-size:12px;
+font-weight:700;
+color:var(--blue-700);
+padding:0 6px;
+}
+.checkrow{
+display:flex;
+align-items:center;
+gap:11px;
+padding:11px 2px;
+border-bottom:1px solid var(--line);
+font-size:14px;
+color:var(--ink-soft);
+cursor:pointer;
+min-height:46px;
+}
+.checkrow:last-of-type{border-bottom:0}
+.checkrow input[type=checkbox]{
+flex:none;
+width:21px;height:21px;
+accent-color:var(--blue-600);
+cursor:pointer;
+margin:0;
+}
+.checkrow:hover{color:var(--ink)}
+.checkrow.sub,.field.sub{
+margin-left:12px;
+padding-left:14px;
+border-left:3px solid var(--blue-100);
+}
+.field.sub{margin-top:12px;padding-bottom:2px}
+.checkfoot{
+margin:10px 0 0;
+font-size:11.5px;
+color:var(--muted);
+}
+.uablock{padding:6px 14px 14px}
+.uablock > * + *{margin-top:14px}
+.uablock .actions{margin-top:14px}
+.chipsetlabel{margin:12px 0 7px;font-size:11.5px;font-weight:700;color:var(--ink-soft)}
+.chipset{display:flex;flex-wrap:wrap;gap:7px}
+.optchip{
+font:inherit;
+font-size:13px;
+background:#fff;
+border:1px solid var(--line-strong);
+border-radius:999px;
+padding:9px 14px;
+cursor:pointer;
+color:var(--ink-soft);
+min-height:40px;
+}
+.optchip:hover{border-color:var(--blue-500);background:var(--blue-50)}
+.optchip[aria-pressed="true"]{
+background:var(--blue-600);
+border-color:var(--blue-600);
+color:#fff;
+font-weight:600;
+}
+.optchip[aria-pressed="true"]::before{content:"✓ "}
 .suggestwrap{position:relative}
 .suggest{
 position:absolute;
@@ -318,6 +386,67 @@ background:var(--blue-50);
 color:var(--blue-700);
 }
 .chip[aria-pressed="true"] .k{background:#ffffff2e;color:#fff}
+.levelref{
+border:1px solid var(--line);
+border-radius:var(--r-md);
+overflow:hidden;
+}
+.levelref > summary{
+padding:11px 14px;
+background:var(--blue-50);
+font-size:13px;
+font-weight:700;
+color:var(--blue-700);
+cursor:pointer;
+list-style:none;
+}
+.levelref > summary::-webkit-details-marker{display:none}
+.levelref > summary::before{content:"▸ ";font-size:11px}
+.levelref[open] > summary::before{content:"▾ "}
+.levelref-body{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+padding:14px;
+border-top:1px solid var(--line);
+}
+.levelref-body h3{
+margin:0 0 9px;
+font-size:12px;
+font-weight:700;
+color:var(--ink-soft);
+text-transform:uppercase;
+letter-spacing:.4px;
+}
+.lvrow{
+display:flex;
+gap:10px;
+align-items:flex-start;
+padding:7px 0;
+border-top:1px solid var(--line);
+}
+.lvrow:first-of-type{border-top:0}
+.lvkey{
+flex:none;
+min-width:92px;
+border-radius:var(--r-sm);
+background:var(--surface-alt);
+border:1px solid var(--line);
+color:var(--ink-soft);
+padding:4px 8px;
+font-size:11.5px;
+font-weight:700;
+text-align:center;
+}
+.lvtxt{font-size:12.5px;line-height:1.45;color:var(--muted)}
+.levelref .src{
+grid-column:1/-1;
+margin:0;
+font-size:11px;
+color:var(--muted);
+border-top:1px solid var(--line);
+padding-top:10px;
+}
 .matrixbox{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
 .matrixbox > summary{
 padding:10px 13px;
@@ -544,6 +673,9 @@ padding:4px 16px 8px;
 .doc-actions .btn{flex:1}
 .legend-row{flex-direction:column;gap:4px}
 .legend-key{min-width:0;align-self:flex-start}
+.levelref-body{grid-template-columns:1fr;gap:16px}
+.lvrow{flex-direction:column;gap:3px}
+.lvkey{min-width:0;align-self:flex-start}
 main{padding:16px 12px 92px}
 .topbar{padding:9px 12px;gap:8px}
 .topbar .mark{font-size:16px}
@@ -613,15 +745,46 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 <input id="pilotoSarpas" placeholder="Nº de cadastro">
 </div>
 </div>
-<div class="field">
-<label for="uaSelect">Adicionar UA cadastrada</label>
+<fieldset class="checktable uablock">
+<legend>Aeronave não tripulada (UA)</legend>
+<div class="field" id="uaSelectWrap" hidden>
+<label for="uaSelect">Carregar UA já cadastrada</label>
 <select id="uaSelect"><option value="">— selecionar —</option></select>
-<div class="hint">Cadastre suas aeronaves em <em>Configurações</em> para selecioná-las com um toque.</div>
+</div>
+<div class="grid3">
+<div class="field">
+<label for="uaIdent">Identificação</label>
+<input id="uaIdent" placeholder="Ex.: UA-01">
 </div>
 <div class="field">
-<label for="aeronaves">Aeronave(s) não tripulada(s)</label>
-<input id="aeronaves" placeholder="Ex.: DJI Mavic 3 Enterprise — Registro PP-XXXXXXXXX">
+<label for="uaFab">Fabricante</label>
+<input id="uaFab" placeholder="Ex.: DJI">
 </div>
+<div class="field">
+<label for="uaMod">Modelo</label>
+<input id="uaMod" placeholder="Ex.: Mavic 3 Enterprise">
+</div>
+</div>
+<div class="grid2">
+<div class="field">
+<label for="uaReg">Registro (SISANT)</label>
+<input id="uaReg" placeholder="Ex.: PP-000000001">
+</div>
+<div class="field">
+<label for="uaSerie">Número de série</label>
+<input id="uaSerie" placeholder="Nº de série do fabricante">
+</div>
+</div>
+<div class="actions">
+<button type="button" class="btn btn-ghost" id="uaSalvar">Salvar no meu cadastro</button>
+<button type="button" class="btn btn-ghost" id="uaAcrescentar">+ Acrescentar outra UA</button>
+</div>
+<div class="field" style="margin-top:14px">
+<label for="aeronaves">Aeronave(s) — como sairá no PDF</label>
+<input id="aeronaves" placeholder="Preenchido pelos campos acima">
+<div class="hint">Montado automaticamente. Você pode editar ou acrescentar mais de uma UA.</div>
+</div>
+</fieldset>
 <div class="field">
 <label for="cenario">Cenário operacional</label>
 <input id="cenario" placeholder="Ex.: Levantamento aéreo em área urbana — Bairro Centro, Vitória/ES">
@@ -635,13 +798,38 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 <label for="legislacao">Legislação aplicável</label>
 <textarea id="legislacao"></textarea>
 </div>
-<div class="field">
-<label for="treinamento">Os pilotos e observadores devem passar por treinamento específico?</label>
-<input id="treinamento">
+<fieldset class="checktable">
+<legend>Equipe e qualificação</legend>
+<label class="checkrow">
+<input type="checkbox" id="qPilotoCurso">
+<span>O piloto tem Curso de Piloto de UA?</span>
+</label>
+<label class="checkrow">
+<input type="checkbox" id="qObservador">
+<span>Vai ter observador?</span>
+</label>
+<label class="checkrow sub" id="rowObsCurso" hidden>
+<input type="checkbox" id="qObsCurso">
+<span>O observador tem Curso de Piloto de UA?</span>
+</label>
+<p class="checkfoot">O que não for marcado é registrado como <strong>Não</strong> no PDF.</p>
+</fieldset>
+<fieldset class="checktable">
+<legend>Operação sobre pessoas</legend>
+<label class="checkrow">
+<input type="checkbox" id="qNaoAnuentes">
+<span>Vai voar sobre pessoas não anuentes?</span>
+</label>
+<div class="field sub" id="rowMedidas" hidden>
+<label for="medidasNaoAnuentes">Medidas de segurança adotadas</label>
+<textarea id="medidasNaoAnuentes"></textarea>
 </div>
+</fieldset>
 <div class="field">
 <label for="acidente">Em caso de acidente com lesões a pessoas, quem acionar? Como proceder?</label>
-<input id="acidente">
+<textarea id="acidente" placeholder="Escolha abaixo ou escreva livremente"></textarea>
+<p class="chipsetlabel">Toque para incluir ou remover:</p>
+<div class="chipset" id="acidenteOpcoes"></div>
 </div>
 </div>
 </div>
@@ -653,6 +841,10 @@ Para cada situação, escolha a <strong>probabilidade</strong> (1 a 5) e a
 <strong>severidade</strong> (A a E). A classificação e a tolerabilidade são calculadas
 pela matriz 5×5 da IS nº E94-003A. Inclua quantas situações forem necessárias.
 </div>
+<details class="levelref" id="levelRef" open>
+<summary>Níveis de probabilidade e severidade — o que cada um significa</summary>
+<div class="levelref-body" id="levelRefBody"></div>
+</details>
 <div id="risks"></div>
 <button type="button" class="btn btn-ghost btn-block" id="addRisk">+ Adicionar situação de risco</button>
 </div>
@@ -660,6 +852,10 @@ pela matriz 5×5 da IS nº E94-003A. Inclua quantas situações forem necessári
 <div class="card">
 <header><span class="step">4</span><h2>Responsável e assinatura</h2></header>
 <div class="body">
+<div class="field">
+<label for="observacoes">Observações a serem consideradas</label>
+<textarea id="observacoes" placeholder="Qualquer informação relevante que não coube nos campos acima (opcional)"></textarea>
+</div>
 <div class="field">
 <label for="responsavel">Responsável pelas informações</label>
 <input id="responsavel">
@@ -1151,16 +1347,38 @@ csText(page, MARGIN, cursorY+9, label.toUpperCase(), 7.5, true, GRAY);
 lines.forEach((l,i)=> csText(page, MARGIN, cursorY+22+i*12, l, 9.5, false, TEXT));
 cursorY += h;
 }
+function boolRow(label, yes){
+const answer = yes ? 'Sim' : 'Não';
+const answerW = textWidth(answer, 9.5, true) + 14;
+const lines = wrapText(label, 9.5, false, CW - answerW);
+const h = lines.length*12 + 14;
+ensure(h);
+const top = cursorY;
+lines.forEach((l,i)=> csText(page, MARGIN, top+10+i*12, l, 9.5, false, TEXT));
+csTextRight(page, PAGE_W-MARGIN, top+10, answer, 9.5, true, yes ? BLUE : GRAY);
+csLine(page, MARGIN, top+h-4, PAGE_W-MARGIN, top+h-4, LINE);
+cursorY += h;
+}
 newPage();
 sectionTitle('1. Identificação');
 fieldsRow2('Data da avaliação', data.dataAvaliacao, 'Válida até', data.validade);
 fieldsRow2('Piloto remoto', data.piloto.nome, 'CPF / CNPJ', data.piloto.cpf);
 fieldsRow2('SARPAS', data.piloto.sarpas, 'Aeronave(s)', data.aeronaves);
+const ua = data.ua || {};
+if (ua.registro || ua.numeroSerie){
+fieldsRow2('Registro (SISANT)', ua.registro, 'Número de série', ua.numeroSerie);
+}
 fieldFull('Cenário operacional', data.cenario);
 sectionTitle('2. Aspectos gerais');
 fieldFull('Legislação aplicável', data.legislacao);
-if (data.distanciaTerceiros) fieldFull('O operador é obrigado a se manter em áreas distantes de terceiros?', data.distanciaTerceiros);
-fieldFull('Os pilotos e observadores devem passar por treinamento específico?', data.treinamentoPM);
+const q = data.qualificacao || {};
+boolRow('O piloto tem Curso de Piloto de UA?', q.pilotoCurso);
+boolRow('Vai ter observador?', q.temObservador);
+if (q.temObservador) boolRow('O observador tem Curso de Piloto de UA?', q.observadorCurso);
+boolRow('Vai voar sobre pessoas não anuentes?', q.sobreNaoAnuentes);
+if (q.sobreNaoAnuentes && q.medidasNaoAnuentes){
+fieldFull('Medidas de segurança adotadas para o voo sobre pessoas não anuentes', q.medidasNaoAnuentes);
+}
 fieldFull('Em caso de acidente com lesões a pessoas, quem acionar? Como proceder?', data.acidente);
 sectionTitle('3. Avaliação do risco');
 (data.riscos||[]).forEach((r, idx)=>{
@@ -1190,6 +1408,10 @@ y += 12;
 mitLines.forEach((l,i)=> csText(page, MARGIN+8, y+i*11, l, 9, false, TEXT));
 cursorY = top + cardH + 10;
 });
+if (data.observacoes){
+sectionTitle('4. Observações');
+fieldFull('Observações a serem consideradas', data.observacoes);
+}
 const total = pages.length;
 pages.forEach((p,i)=>{
 csText(p, MARGIN, PAGE_H-16, CREDIT_LINE, 7.5, false, [148,163,184]);
@@ -1302,8 +1524,21 @@ const TOLER_DEF = [
 ['muito-baixo','Risco muito baixo','1D, 1E, 2E','A operação é aceitável como concebida. Nenhum controle preventivo de mitigação e nenhuma aprovação é requerida para que ela ocorra.']
 ];
 const DEFAULT_LEGISLACAO = 'Código Brasileiro de Aeronáutica (Lei nº 7.565/1986); RBAC 100 da ANAC; IS nº E94-003 – Revisão A, da ANAC; ICA 100-40, revisada em 10 de março de 2017, do DECEA.';
-const DEFAULT_TREINAMENTO = 'Sim, Curso de Piloto de UA (aeronave não tripulada).';
-const DEFAULT_ACIDENTE = 'SAMU 192';
+const EXEMPLO_MEDIDAS = 'Manter distância horizontal mínima de 30 m das pessoas não anuentes, ' +
+'salvo quando houver barreira mecânica suficiente para conter a projeção da UA em caso de queda.';
+const ORGAOS_ACIDENTE = [
+['SAMU 192',        'Acionar o serviço médico de urgência (SAMU) pelo 192'],
+['Bombeiros 193',   'Acionar o Corpo de Bombeiros pelo 193'],
+['Polícia Militar 190', 'Acionar a Polícia Militar pelo 190'],
+['Defesa Civil 199','Acionar a Defesa Civil pelo 199'],
+['Polícia Federal 194', 'Acionar a Polícia Federal pelo 194'],
+['CENIPA/SIPAER',   'Notificar a ocorrência aeronáutica ao CENIPA (SIPAER)'],
+['ANAC',            'Comunicar a ocorrência à ANAC'],
+['DECEA',           'Comunicar o DECEA e encerrar o protocolo SARPAS'],
+['IBAMA',           'Acionar o IBAMA em caso de dano ambiental ou à fauna'],
+['Órgão ambiental', 'Acionar o órgão ambiental estadual ou municipal'],
+['Isolar a área',   'Isolar a área do acidente e preservar o local até a chegada do socorro']
+];
 const DEFAULT_CATALOGO = [
 {id:'RISCO-001', situacao:'Perda do enlace de comando e controle (C2) — perda de comunicação entre o piloto/estação de controle e a UA durante o voo.', mitigacoes:''},
 {id:'RISCO-002', situacao:'Presença de tráfego aéreo tripulado — aproximação de helicópteros, aviões ou outras aeronaves na área da operação.', mitigacoes:''},
@@ -1405,12 +1640,26 @@ $('validade').value      = d.validade || addMonthsIso($('dataAvaliacao').value, 
 $('pilotoNome').value    = d.pilotoNome   != null ? d.pilotoNome   : CONFIG.piloto.nome;
 $('pilotoCpf').value     = d.pilotoCpf    != null ? d.pilotoCpf    : CONFIG.piloto.cpf;
 $('pilotoSarpas').value  = d.pilotoSarpas != null ? d.pilotoSarpas : CONFIG.piloto.sarpas;
+const ua = d.ua || {};
+$('uaIdent').value = ua.identificacao || '';
+$('uaFab').value   = ua.fabricante || '';
+$('uaMod').value   = ua.modelo || '';
+$('uaReg').value   = ua.registro || '';
+$('uaSerie').value = ua.numeroSerie || '';
 $('aeronaves').value     = d.aeronaves || '';
 $('cenario').value       = d.cenario || '';
 $('legislacao').value    = d.legislacao || DEFAULT_LEGISLACAO;
-$('treinamento').value   = d.treinamento || DEFAULT_TREINAMENTO;
-$('acidente').value      = d.acidente || DEFAULT_ACIDENTE;
+$('acidente').value      = d.acidente || '';
+$('observacoes').value   = d.observacoes || '';
 $('responsavel').value   = d.responsavel != null ? d.responsavel : CONFIG.piloto.nome;
+const q = d.qualificacao || {};
+$('qPilotoCurso').checked = !!q.pilotoCurso;
+$('qObservador').checked  = !!q.temObservador;
+$('qObsCurso').checked    = !!q.observadorCurso;
+$('qNaoAnuentes').checked = !!q.sobreNaoAnuentes;
+$('medidasNaoAnuentes').value = q.medidasNaoAnuentes || '';
+syncCondicionais();
+renderAcidenteChips();
 renderUaSelect();
 $('risks').innerHTML = '';
 riskSeq = 0;
@@ -1428,23 +1677,120 @@ if (validadeTocada && force !== true) return;
 $('validade').value = addMonthsIso(base, CONFIG.validadeMeses);
 $('validadeHint').textContent = CONFIG.validadeMeses + ' meses a partir da data da avaliação. Pode ser editada.';
 }
+const UA_CAMPOS = ['uaIdent','uaFab','uaMod','uaReg','uaSerie'];
 function renderUaSelect(){
+$('uaSelectWrap').hidden = UAS.length === 0;
 $('uaSelect').innerHTML = '<option value="">— selecionar —</option>' +
 UAS.map(u => '<option value="'+esc(u.id)+'">'+
 esc([u.identificacao,u.fabricante,u.modelo].filter(Boolean).join(' — '))+'</option>').join('');
 }
 $('uaSelect').addEventListener('change', function(){
-if (!this.value) return;
 const u = UAS.find(x => x.id === this.value);
-if (u){
-const txt = [u.identificacao,u.fabricante,u.modelo].filter(Boolean).join(' ') +
-(u.registro ? ' — Registro '+u.registro : '');
-const cur = $('aeronaves').value.trim();
-$('aeronaves').value = cur ? cur+'; '+txt : txt;
-updateStatus();
-}
 this.value = '';
+if (!u) return;
+$('uaIdent').value = u.identificacao || '';
+$('uaFab').value   = u.fabricante || '';
+$('uaMod').value   = u.modelo || '';
+$('uaReg').value   = u.registro || '';
+$('uaSerie').value = u.numeroSerie || '';
+$('aeronaves').value = uaTexto();
+updateStatus();
 });
+function lerUaCampos(){
+return {
+identificacao: val('uaIdent'), fabricante: val('uaFab'), modelo: val('uaMod'),
+registro: val('uaReg'), numeroSerie: val('uaSerie')
+};
+}
+function uaTexto(u){
+u = u || lerUaCampos();
+const nome = [u.identificacao, u.fabricante, u.modelo].filter(Boolean).join(' ');
+const extra = [];
+if (u.registro) extra.push('Registro ' + u.registro);
+if (u.numeroSerie) extra.push('S/N ' + u.numeroSerie);
+return [nome, extra.join(', ')].filter(Boolean).join(' — ');
+}
+let aeronavesTocado = false;
+$('aeronaves').addEventListener('input', () => { aeronavesTocado = true; updateStatus(); });
+UA_CAMPOS.forEach(id => $(id).addEventListener('input', () => {
+if (!aeronavesTocado) { $('aeronaves').value = uaTexto(); updateStatus(); }
+}));
+$('uaSalvar').addEventListener('click', () => {
+const u = lerUaCampos();
+if (!u.identificacao && !u.modelo){
+alert('Preencha ao menos a identificação ou o modelo da UA antes de salvar.');
+return;
+}
+const igual = UAS.find(x =>
+x.identificacao === u.identificacao && x.modelo === u.modelo && x.registro === u.registro);
+if (igual){ alert('Esta UA já está no seu cadastro.'); return; }
+UAS.push(Object.assign({id: uid('ua')}, u));
+saveUas();
+renderUaSelect();
+alert('UA salva no cadastro deste aparelho.');
+});
+$('uaAcrescentar').addEventListener('click', () => {
+const txt = uaTexto();
+if (!txt){ alert('Preencha os dados da UA antes de acrescentar.'); return; }
+const cur = $('aeronaves').value.trim();
+aeronavesTocado = true;
+$('aeronaves').value = cur && cur !== txt ? cur + '; ' + txt : txt;
+UA_CAMPOS.forEach(id => { $(id).value = ''; });
+$('uaIdent').focus();
+updateStatus();
+});
+function syncCondicionais(){
+const temObs = $('qObservador').checked;
+$('rowObsCurso').hidden = !temObs;
+if (!temObs) $('qObsCurso').checked = false;
+const naoAnuentes = $('qNaoAnuentes').checked;
+$('rowMedidas').hidden = !naoAnuentes;
+if (naoAnuentes && !val('medidasNaoAnuentes')){
+$('medidasNaoAnuentes').value = EXEMPLO_MEDIDAS;
+}
+}
+$('qObservador').addEventListener('change', syncCondicionais);
+$('qNaoAnuentes').addEventListener('change', syncCondicionais);
+function renderLevelRef(){
+$('levelRefBody').innerHTML =
+'<div><h3>Probabilidade</h3>'+
+PROBS.map(([n,termo]) =>
+'<div class="lvrow"><span class="lvkey">'+n+' · '+esc(termo)+'</span>'+
+'<span class="lvtxt">'+esc(PROB_DEF[n])+'</span></div>').join('')+
+'</div>'+
+'<div><h3>Severidade</h3>'+
+SEVS.map(([k,termo]) =>
+'<div class="lvrow"><span class="lvkey">'+k+' · '+esc(termo)+'</span>'+
+'<span class="lvtxt">'+esc(SEV_DEF[k])+'</span></div>').join('')+
+'</div>'+
+'<p class="src">IS nº E94-003 Rev. A, itens 4.1.2 e 4.1.3. A divisão dos níveis fica a '+
+'critério do operador; esta é a orientação da norma.</p>';
+$('levelRef').open = LS.get('aro_levelref_aberto', true);
+$('levelRef').addEventListener('toggle', () =>
+LS.set('aro_levelref_aberto', $('levelRef').open));
+}
+function renderAcidenteChips(){
+const box = $('acidenteOpcoes');
+box.innerHTML = ORGAOS_ACIDENTE.map(([rotulo, texto], i) =>
+'<button type="button" class="optchip" data-i="'+i+'" aria-pressed="false">'+esc(rotulo)+'</button>').join('');
+box.querySelectorAll('.optchip').forEach(b => b.addEventListener('click', () => {
+const texto = ORGAOS_ACIDENTE[Number(b.dataset.i)][1];
+const partes = val('acidente').split(';').map(s => s.trim()).filter(Boolean);
+const at = partes.indexOf(texto);
+if (at >= 0) partes.splice(at, 1); else partes.push(texto);
+$('acidente').value = partes.join('; ');
+sincronizarAcidenteChips();
+}));
+sincronizarAcidenteChips();
+}
+function sincronizarAcidenteChips(){
+const atual = val('acidente');
+$('acidenteOpcoes').querySelectorAll('.optchip').forEach(b => {
+const texto = ORGAOS_ACIDENTE[Number(b.dataset.i)][1];
+b.setAttribute('aria-pressed', String(atual.includes(texto)));
+});
+}
+$('acidente').addEventListener('input', sincronizarAcidenteChips);
 let riskSeq = 0;
 function matrixHtml(){
 const head = '<tr><th class="corner">Prob. \\ Sev.</th>' +
@@ -1729,16 +2075,26 @@ if (!riscos.length)   erros.push('• Inclua ao menos uma situação de risco co
 if (!sigDirty)        erros.push('• Assine no campo de assinatura.');
 if (erros.length){ alert('Faltam informações para gerar o PDF:\n\n'+erros.join('\n')); return null; }
 const dataIso = val('dataAvaliacao') || todayIso();
+const temObservador = $('qObservador').checked;
+const sobreNaoAnuentes = $('qNaoAnuentes').checked;
 return {
 dataAvaliacao: isoToBr(dataIso),
 validade: isoToBr(val('validade')),
 piloto: {nome, cpf: val('pilotoCpf'), sarpas: val('pilotoSarpas')},
+ua: lerUaCampos(),
 aeronaves: val('aeronaves'),
 cenario: val('cenario'),
 legislacao: val('legislacao') || DEFAULT_LEGISLACAO,
+qualificacao: {
+pilotoCurso: $('qPilotoCurso').checked,
+temObservador,
+observadorCurso: temObservador && $('qObsCurso').checked,
+sobreNaoAnuentes,
+medidasNaoAnuentes: sobreNaoAnuentes ? val('medidasNaoAnuentes') : ''
+},
 distanciaTerceiros: '',
-treinamentoPM: val('treinamento') || DEFAULT_TREINAMENTO,
-acidente: val('acidente') || DEFAULT_ACIDENTE,
+acidente: val('acidente'),
+observacoes: val('observacoes'),
 riscos,
 responsavel: val('responsavel') || nome,
 _iso: {dataAvaliacao: dataIso, validade: val('validade')}
@@ -1832,8 +2188,17 @@ $('saveDraft').addEventListener('click', () => {
 const ok = LS.set('aro_draft', {
 dataAvaliacao: val('dataAvaliacao'), validade: val('validade'),
 pilotoNome: val('pilotoNome'), pilotoCpf: val('pilotoCpf'), pilotoSarpas: val('pilotoSarpas'),
+ua: lerUaCampos(),
 aeronaves: val('aeronaves'), cenario: val('cenario'), legislacao: val('legislacao'),
-treinamento: val('treinamento'), acidente: val('acidente'), responsavel: val('responsavel'),
+acidente: val('acidente'), observacoes: val('observacoes'),
+responsavel: val('responsavel'),
+qualificacao: {
+pilotoCurso: $('qPilotoCurso').checked,
+temObservador: $('qObservador').checked,
+observadorCurso: $('qObsCurso').checked,
+sobreNaoAnuentes: $('qNaoAnuentes').checked,
+medidasNaoAnuentes: val('medidasNaoAnuentes')
+},
 riscos: readRisks()
 });
 alert(ok ? 'Rascunho salvo neste aparelho.\n(A assinatura não é salva no rascunho.)'
@@ -2070,6 +2435,7 @@ $('firstRun').hidden = true;
 LS.set('aro_notice_dismissed', true);
 });
 if (LS.get('aro_notice_dismissed', false)) $('firstRun').hidden = true;
+renderLevelRef();
 setupSignaturePad();
 setupNovaForm(LS.get('aro_draft', null));
 showView('nova');
