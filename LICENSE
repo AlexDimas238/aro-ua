@@ -1,0 +1,44 @@
+ARO UA — Avaliação de Risco Operacional
+Copyright (c) 2026 Alexandre Dimas. Todos os direitos reservados.
+
+TERMOS DE USO
+
+1. USO PERMITIDO
+   É concedida a qualquer pessoa autorização gratuita, não exclusiva e revogável para
+   ACESSAR e UTILIZAR esta aplicação, no endereço oficial publicado pelo autor, com a
+   finalidade de elaborar Avaliações de Risco Operacional (ARO) para operações com
+   aeronave não tripulada. Os documentos em PDF gerados pela aplicação pertencem a quem
+   os produziu e podem ser usados livremente.
+
+2. USO NÃO AUTORIZADO
+   Sem autorização prévia, expressa e por escrito do autor, NÃO são permitidas:
+   a) a cópia, no todo ou em parte, do código-fonte ou do arquivo compilado;
+   b) a redistribuição, revenda, sublicenciamento ou cessão da aplicação;
+   c) a hospedagem ou publicação da aplicação em endereço diverso do oficial;
+   d) a modificação, adaptação, tradução ou criação de obra derivada;
+   e) a engenharia reversa, descompilação ou desofuscação;
+   f) a remoção ou alteração dos avisos de autoria e de direitos autorais, inclusive
+      da identificação impressa no rodapé dos PDFs gerados, que é parte integrante da obra;
+   g) qualquer uso comercial da aplicação ou de partes dela.
+
+3. DOCUMENTOS NORMATIVOS DE TERCEIROS
+   Os arquivos em docs/ (RBAC 100 e IS nº E94-003 Rev. A, da ANAC; ICA 100-40, do DECEA)
+   são atos normativos oficiais, reproduzidos na íntegra e sem alteração, nos termos do
+   art. 8º, IV, da Lei nº 9.610/1998. Não são obra do autor desta aplicação e não estão
+   abrangidos por esta licença. Confirme sempre a versão vigente junto ao órgão emissor.
+
+4. AUSÊNCIA DE GARANTIA E LIMITAÇÃO DE RESPONSABILIDADE
+   A APLICAÇÃO É FORNECIDA "COMO ESTÁ", SEM GARANTIA DE QUALQUER NATUREZA, EXPRESSA OU
+   IMPLÍCITA. A ferramenta auxilia o registro e a classificação do risco; ela NÃO autoriza
+   nem impede a realização de qualquer operação aérea. A decisão de operar, a exatidão das
+   informações prestadas e o cumprimento da regulamentação aplicável são de responsabilidade
+   exclusiva do piloto remoto, do operador e da autoridade competente. Em nenhuma hipótese o
+   autor responderá por danos diretos, indiretos, incidentais ou consequentes decorrentes do
+   uso ou da impossibilidade de uso da aplicação.
+
+5. PRIVACIDADE
+   A aplicação não coleta, não transmite e não armazena dados em servidores. Todas as
+   informações, inclusive a assinatura manuscrita, permanecem exclusivamente no navegador
+   do usuário.
+
+Contato: Alexandre Dimas — dimas.ppsarp@gmail.com — https://github.com/AlexDimas238
