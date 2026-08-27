@@ -224,7 +224,45 @@ cursor:pointer;
 margin:0;
 }
 .checkrow:hover{color:var(--ink)}
-.checkrow.sub,.field.sub{
+.qrow{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:14px;
+padding:10px 2px;
+border-bottom:1px solid var(--line);
+min-height:48px;
+}
+.qrow:last-of-type{border-bottom:0}
+.qtext{font-size:14px;color:var(--ink-soft);line-height:1.4}
+.qopts{display:flex;gap:8px;flex:none}
+.qopts label{
+display:flex;
+align-items:center;
+gap:7px;
+border:1px solid var(--line-strong);
+border-radius:var(--r-sm);
+padding:8px 13px;
+font-size:13.5px;
+font-weight:600;
+color:var(--ink-soft);
+cursor:pointer;
+min-height:42px;
+background:#fff;
+}
+.qopts label:hover{border-color:var(--blue-500);background:var(--blue-50)}
+.qopts input[type=radio]{
+width:18px;height:18px;
+accent-color:var(--blue-600);
+margin:0;
+cursor:pointer;
+}
+.qopts label:has(input:checked){
+border-color:var(--blue-600);
+background:var(--blue-50);
+color:var(--blue-700);
+}
+.checkrow.sub,.qrow.sub,.field.sub{
 margin-left:12px;
 padding-left:14px;
 border-left:3px solid var(--blue-100);
@@ -673,6 +711,8 @@ padding:4px 16px 8px;
 .doc-actions .btn{flex:1}
 .legend-row{flex-direction:column;gap:4px}
 .legend-key{min-width:0;align-self:flex-start}
+.qrow{flex-direction:column;align-items:stretch;gap:9px}
+.qopts label{flex:1;justify-content:center}
 .levelref-body{grid-template-columns:1fr;gap:16px}
 .lvrow{flex-direction:column;gap:3px}
 .lvkey{min-width:0;align-self:flex-start}
@@ -800,26 +840,39 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 </div>
 <fieldset class="checktable">
 <legend>Equipe e qualificação</legend>
-<label class="checkrow">
-<input type="checkbox" id="qPilotoCurso">
-<span>O piloto tem Curso de Piloto de UA?</span>
-</label>
-<label class="checkrow">
-<input type="checkbox" id="qObservador">
-<span>Vai ter observador?</span>
-</label>
-<label class="checkrow sub" id="rowObsCurso" hidden>
-<input type="checkbox" id="qObsCurso">
-<span>O observador tem Curso de Piloto de UA?</span>
-</label>
-<p class="checkfoot">O que não for marcado é registrado como <strong>Não</strong> no PDF.</p>
+<div class="qrow">
+<span class="qtext">O piloto tem Curso de Piloto de UA?</span>
+<div class="qopts">
+<label><input type="radio" name="qPilotoCurso" value="sim"> Sim</label>
+<label><input type="radio" name="qPilotoCurso" value="nao"> Não</label>
+</div>
+</div>
+<div class="qrow">
+<span class="qtext">Vai ter observador?</span>
+<div class="qopts">
+<label><input type="radio" name="qObservador" value="sim"> Sim</label>
+<label><input type="radio" name="qObservador" value="nao"> Não</label>
+</div>
+</div>
+<div class="qrow sub" id="rowObsCurso" hidden>
+<span class="qtext">O observador tem Curso de Piloto de UA?</span>
+<div class="qopts">
+<label><input type="radio" name="qObsCurso" value="sim"> Sim</label>
+<label><input type="radio" name="qObsCurso" value="nao"> Não</label>
+</div>
+</div>
+<p class="checkfoot">Nenhuma resposta é obrigatória. O que ficar em branco é
+registrado como <strong>Não</strong> no PDF. Para desmarcar, toque de novo na opção.</p>
 </fieldset>
 <fieldset class="checktable">
 <legend>Operação sobre pessoas</legend>
-<label class="checkrow">
-<input type="checkbox" id="qNaoAnuentes">
-<span>Vai voar sobre pessoas não anuentes?</span>
-</label>
+<div class="qrow">
+<span class="qtext">Vai voar sobre pessoas não anuentes?</span>
+<div class="qopts">
+<label><input type="radio" name="qNaoAnuentes" value="sim"> Sim</label>
+<label><input type="radio" name="qNaoAnuentes" value="nao"> Não</label>
+</div>
+</div>
 <div class="field sub" id="rowMedidas" hidden>
 <label for="medidasNaoAnuentes">Medidas de segurança adotadas</label>
 <textarea id="medidasNaoAnuentes"></textarea>
@@ -1807,10 +1860,10 @@ $('acidente').value      = d.acidente || '';
 $('observacoes').value   = d.observacoes || '';
 $('responsavel').value   = d.responsavel != null ? d.responsavel : CONFIG.piloto.nome;
 const q = d.qualificacao || {};
-$('qPilotoCurso').checked = !!q.pilotoCurso;
-$('qObservador').checked  = !!q.temObservador;
-$('qObsCurso').checked    = !!q.observadorCurso;
-$('qNaoAnuentes').checked = !!q.sobreNaoAnuentes;
+setResposta('qPilotoCurso', q.pilotoCurso);
+setResposta('qObservador',  q.temObservador);
+setResposta('qObsCurso',    q.observadorCurso);
+setResposta('qNaoAnuentes', q.sobreNaoAnuentes);
 $('medidasNaoAnuentes').value = q.medidasNaoAnuentes || '';
 syncCondicionais();
 renderAcidenteChips();
@@ -1893,18 +1946,41 @@ UA_CAMPOS.forEach(id => { $(id).value = ''; });
 $('uaIdent').focus();
 updateStatus();
 });
+function resposta(nome){
+const m = document.querySelector('input[name="'+nome+'"]:checked');
+return m ? m.value : '';
+}
+function setResposta(nome, v){
+if (v === true) v = 'sim';
+else if (v === false) v = '';
+document.querySelectorAll('input[name="'+nome+'"]').forEach(r => {
+r.checked = (r.value === v);
+r.dataset.antes = '0';
+});
+}
+function ligarRespostas(nome, aoMudar){
+const grupo = [...document.querySelectorAll('input[name="'+nome+'"]')];
+grupo.forEach(r => {
+r.addEventListener('pointerdown', () => { r.dataset.antes = r.checked ? '1' : '0'; });
+r.addEventListener('click', () => {
+if (r.dataset.antes === '1') r.checked = false;
+grupo.forEach(x => { x.dataset.antes = '0'; });
+if (aoMudar) aoMudar();
+});
+});
+}
 function syncCondicionais(){
-const temObs = $('qObservador').checked;
+const temObs = resposta('qObservador') === 'sim';
 $('rowObsCurso').hidden = !temObs;
-if (!temObs) $('qObsCurso').checked = false;
-const naoAnuentes = $('qNaoAnuentes').checked;
+if (!temObs) setResposta('qObsCurso', '');
+const naoAnuentes = resposta('qNaoAnuentes') === 'sim';
 $('rowMedidas').hidden = !naoAnuentes;
 if (naoAnuentes && !val('medidasNaoAnuentes')){
 $('medidasNaoAnuentes').value = EXEMPLO_MEDIDAS;
 }
 }
-$('qObservador').addEventListener('change', syncCondicionais);
-$('qNaoAnuentes').addEventListener('change', syncCondicionais);
+['qPilotoCurso','qObsCurso'].forEach(n => ligarRespostas(n));
+['qObservador','qNaoAnuentes'].forEach(n => ligarRespostas(n, syncCondicionais));
 function renderLevelRef(){
 $('levelRefBody').innerHTML =
 '<div><h3>Probabilidade</h3>'+
@@ -2268,8 +2344,8 @@ if (!riscos.length)   erros.push('• Inclua ao menos uma situação de risco co
 if (!sigDirty)        erros.push('• Assine no campo de assinatura.');
 if (erros.length){ alert('Faltam informações para gerar o PDF:\n\n'+erros.join('\n')); return null; }
 const dataIso = val('dataAvaliacao') || todayIso();
-const temObservador = $('qObservador').checked;
-const sobreNaoAnuentes = $('qNaoAnuentes').checked;
+const temObservador = resposta('qObservador') === 'sim';
+const sobreNaoAnuentes = resposta('qNaoAnuentes') === 'sim';
 return {
 dataAvaliacao: isoToBr(dataIso),
 validade: isoToBr(val('validade')),
@@ -2279,9 +2355,9 @@ aeronaves: val('aeronaves'),
 cenario: val('cenario'),
 legislacao: val('legislacao') || DEFAULT_LEGISLACAO,
 qualificacao: {
-pilotoCurso: $('qPilotoCurso').checked,
+pilotoCurso: resposta('qPilotoCurso') === 'sim',
 temObservador,
-observadorCurso: temObservador && $('qObsCurso').checked,
+observadorCurso: temObservador && resposta('qObsCurso') === 'sim',
 sobreNaoAnuentes,
 medidasNaoAnuentes: sobreNaoAnuentes ? val('medidasNaoAnuentes') : ''
 },
@@ -2377,10 +2453,10 @@ aeronaves: val('aeronaves'), cenario: val('cenario'), legislacao: val('legislaca
 acidente: val('acidente'), observacoes: val('observacoes'),
 responsavel: val('responsavel'),
 qualificacao: {
-pilotoCurso: $('qPilotoCurso').checked,
-temObservador: $('qObservador').checked,
-observadorCurso: $('qObsCurso').checked,
-sobreNaoAnuentes: $('qNaoAnuentes').checked,
+pilotoCurso: resposta('qPilotoCurso'),
+temObservador: resposta('qObservador'),
+observadorCurso: resposta('qObsCurso'),
+sobreNaoAnuentes: resposta('qNaoAnuentes'),
 medidasNaoAnuentes: val('medidasNaoAnuentes')
 },
 riscos: readRisks()
