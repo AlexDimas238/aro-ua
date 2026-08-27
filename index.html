@@ -159,9 +159,10 @@ display:grid;
 place-items:center;
 }
 .card .body{padding:16px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.field + .field,.grid2 + .field,.field + .grid2,.grid2 + .grid2,.grid3 + .field,.field + .grid3{margin-top:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.card > .body > * + *,
+.risk > .body > * + *{margin-top:14px}
 .field label{
 display:block;
 font-size:12px;
@@ -276,7 +277,7 @@ font-weight:700;
 color:var(--blue-700);
 }
 .risk .body{padding:14px}
-.levels{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .levels h3{
 margin:0 0 8px;
 font-size:12px;
@@ -317,7 +318,7 @@ background:var(--blue-50);
 color:var(--blue-700);
 }
 .chip[aria-pressed="true"] .k{background:#ffffff2e;color:#fff}
-.matrixbox{margin-top:14px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.matrixbox{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
 .matrixbox > summary{
 padding:10px 13px;
 background:var(--surface-alt);
@@ -364,7 +365,35 @@ box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink);
 .lv-moderado{background:var(--moderado);color:#3d3206}
 .lv-baixo{background:var(--baixo);color:#14432a}
 .lv-muito-baixo{background:var(--muito-baixo);color:#fff}
-.result{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.riskdesc{
+border:1px solid var(--line);
+border-left-width:4px;
+border-radius:var(--r-sm);
+background:var(--surface-alt);
+padding:12px 14px;
+}
+.riskdesc .rd-head{
+display:flex;
+align-items:center;
+gap:9px;
+flex-wrap:wrap;
+margin:0 0 8px;
+}
+.rd-badge{
+border-radius:var(--r-sm);
+padding:4px 10px;
+font-size:11.5px;
+font-weight:700;
+}
+.rd-combo{font-size:11.5px;color:var(--muted);font-weight:600}
+.riskdesc .rd-text{margin:0;font-size:13px;line-height:1.5;color:var(--ink-soft)}
+.riskdesc .rd-src{margin:8px 0 0;font-size:11px;color:var(--muted)}
+.bd-extremo{border-left-color:var(--extremo)}
+.bd-alto{border-left-color:var(--alto)}
+.bd-moderado{border-left-color:var(--moderado)}
+.bd-baixo{border-left-color:#4ade80}
+.bd-muito-baixo{border-left-color:var(--muito-baixo)}
 .pill{
 border-radius:var(--r-md);
 padding:12px;
@@ -635,7 +664,7 @@ pela matriz 5×5 da IS nº E94-003A. Inclua quantas situações forem necessári
 <label for="responsavel">Responsável pelas informações</label>
 <input id="responsavel">
 </div>
-<div class="field" style="margin-top:14px">
+<div class="field">
 <label for="sig">Assinatura</label>
 <canvas id="sig" class="sig" aria-label="Área de assinatura: desenhe com o dedo ou o mouse"></canvas>
 <div class="hint">Assine com o dedo (celular/tablet) ou com o mouse.</div>
@@ -705,13 +734,7 @@ de uso do espaço aéreo (SARPAS) e condições de voo.</p>
 <a class="btn btn-ghost" href="docs/ica-100-40.pdf" download>Baixar</a>
 </div>
 </div>
-<div class="notice" style="margin:16px 0 0">
-<strong>Manual da aeronave.</strong> O manual do fabricante não é redistribuído aqui por
-ser material protegido por direito autoral da empresa. Baixe-o no site oficial do
-fabricante — para DJI:
-<a href="https://www.dji.com/br/downloads" target="_blank" rel="noopener">dji.com/br/downloads</a>.
-</div>
-<div class="notice warn" style="margin-top:12px">
+<div class="notice warn" style="margin-top:16px">
 <strong>Confira a vigência.</strong> As normas são atualizadas periodicamente. Antes de
 operar, confirme a versão vigente em
 <a href="https://www.gov.br/anac" target="_blank" rel="noopener">gov.br/anac</a> e
@@ -825,21 +848,13 @@ sempre do piloto remoto e da autoridade competente.
 <label>Desenvolvedor</label>
 <p style="margin:0;font-size:15px"><strong>Alexandre Dimas</strong></p>
 </div>
-<div class="field" style="margin-top:14px">
+<div class="field">
 <label>E-mail</label>
 <p style="margin:0"><a href="mailto:dimas.ppsarp@gmail.com">dimas.ppsarp@gmail.com</a></p>
 </div>
-<div class="field" style="margin-top:14px">
+<div class="field">
 <label>GitHub</label>
 <p style="margin:0"><a href="https://github.com/AlexDimas238" target="_blank" rel="noopener">github.com/AlexDimas238</a></p>
-</div>
-<div class="field" style="margin-top:14px" id="waField" hidden>
-<label>WhatsApp</label>
-<p style="margin:0"><a id="waLink" href="#" target="_blank" rel="noopener"></a></p>
-</div>
-<div class="field" style="margin-top:14px">
-<label for="cfgWhatsapp">WhatsApp para exibir no contato (opcional)</label>
-<input id="cfgWhatsapp" inputmode="numeric" placeholder="Ex.: 5527999999999">
 </div>
 </div>
 </div>
@@ -1265,6 +1280,27 @@ const AUTH = {
 };
 const PROBS = [[5,'Frequente'],[4,'Ocasional'],[3,'Remoto'],[2,'Improvável'],[1,'Muito improvável']];
 const SEVS  = [['A','Catastrófico'],['B','Crítico'],['C','Significativo'],['D','Pequeno'],['E','Insignificante']];
+const PROB_DEF = {
+5:'É provável que ocorra muitas vezes, ou historicamente tem ocorrido frequentemente.',
+4:'É provável que ocorra algumas vezes, ou historicamente tem ocorrido com pouca frequência.',
+3:'É improvável, mas é possível que venha a ocorrer, ou ocorre raramente.',
+2:'É bastante improvável que ocorra e não se tem notícia de que tenha alguma vez ocorrido.',
+1:'É quase impossível que o evento ocorra.'
+};
+const SEV_DEF = {
+A:'Morte de múltiplas pessoas.',
+B:'Morte de pessoa, lesões gravíssimas, capazes de deixar sequelas significativas e/ou incapacitantes (cegueira, paralisia, amputações).',
+C:'Lesões sérias a pessoas, mas não incapacitantes nem com sequelas significativas.',
+D:'Incidentes menores, danos a objetos, animais ou vegetação no solo, lesões leves.',
+E:'Somente danos ao equipamento.'
+};
+const TOLER_DEF = [
+['extremo','Risco extremo','4A, 5A, 5B','A operação não deve ocorrer e, caso esteja ocorrendo, deve cessar imediatamente, enquanto persistir a condição ou até que medidas mitigadoras suficientes reduzam o risco a nível aceitável. Caso ainda se decida prosseguir, controles preventivos devem estar em vigor e a aprovação da hierarquia mais alta deve ser requerida.'],
+['alto','Alto risco','3A, 4B, 5C','A operação não deveria ocorrer e, caso esteja ocorrendo, deveria cessar imediatamente. Caso se decida prosseguir, controles preventivos devem estar em vigor e a aprovação da hierarquia de gestão (gerente ou diretor) deve ser requerida.'],
+['moderado','Risco moderado','1A, 2A, 2B, 3B, 3C, 4C, 4D, 5D, 5E','A operação pode ocorrer com controles preventivos de mitigação estabelecidos e em vigor, conforme necessários. Operações neste nível deveriam ser aprovadas pelo nível hierárquico imediatamente superior (chefia imediata).'],
+['baixo','Baixo risco','1B, 1C, 2C, 2D, 3D, 3E, 4E','A operação pode ocorrer. Controles preventivos de mitigação e aprovação pelo nível hierárquico imediatamente superior são opcionais.'],
+['muito-baixo','Risco muito baixo','1D, 1E, 2E','A operação é aceitável como concebida. Nenhum controle preventivo de mitigação e nenhuma aprovação é requerida para que ela ocorra.']
+];
 const DEFAULT_LEGISLACAO = 'Código Brasileiro de Aeronáutica (Lei nº 7.565/1986); RBAC 100 da ANAC; IS nº E94-003 – Revisão A, da ANAC; ICA 100-40, revisada em 10 de março de 2017, do DECEA.';
 const DEFAULT_TREINAMENTO = 'Sim, Curso de Piloto de UA (aeronave não tripulada).';
 const DEFAULT_ACIDENTE = 'SAMU 192';
@@ -1297,8 +1333,7 @@ function loadConfig(){
 const c = LS.get('aro_config', null) || {};
 return {
 piloto: c.piloto || {nome:'', cpf:'', sarpas:''},
-validadeMeses: Number(c.validadeMeses) || 12,
-whatsapp: c.whatsapp || ''
+validadeMeses: Number(c.validadeMeses) || 12
 };
 }
 function saveConfig(){ LS.set('aro_config', CONFIG); }
@@ -1457,6 +1492,7 @@ SEVS.map(s => '<button type="button" class="chip" data-v="'+s[0]+'" aria-pressed
 '<div class="pill f-classif"><small>Classificação</small>—</div>'+
 '<div class="pill f-toler"><small>Tolerabilidade</small>—</div>'+
 '</div>'+
+'<div class="riskdesc f-desc" hidden></div>'+
 '<div class="field" style="margin-top:14px"><label>Nível hierárquico de autorização da operação</label>'+
 '<input class="f-aut" placeholder="Sugerido conforme a classificação"></div>'+
 '<div class="field" style="margin-top:14px"><label>Medidas de mitigação do risco</label>'+
@@ -1504,9 +1540,11 @@ div.querySelectorAll('.mcell').forEach(c =>
 c.setAttribute('aria-pressed', String(!!p && !!s && c.dataset.p === p && c.dataset.s === s)));
 const classif = div.querySelector('.f-classif');
 const toler   = div.querySelector('.f-toler');
+const desc    = div.querySelector('.f-desc');
 if (!p || !s){
 classif.className = 'pill f-classif'; classif.innerHTML = '<small>Classificação</small>—';
 toler.className   = 'pill f-toler';   toler.innerHTML   = '<small>Tolerabilidade</small>—';
+desc.hidden = true; desc.innerHTML = '';
 updateStatus();
 return;
 }
@@ -1516,6 +1554,21 @@ classif.className = 'pill f-classif lv-'+key;
 classif.innerHTML = '<small>Classificação</small>'+code;
 toler.className   = 'pill f-toler lv-'+key;
 toler.innerHTML   = '<small>Tolerabilidade</small>'+esc(label);
+const def = TOLER_DEF.find(t => t[0] === key);
+if (def){
+const probTermo = (PROBS.find(x => String(x[0]) === String(p)) || [,''])[1];
+const sevTermo  = (SEVS.find(x => x[0] === s) || ['',''])[1];
+desc.className = 'riskdesc f-desc bd-'+key;
+desc.innerHTML =
+'<p class="rd-head"><span class="rd-badge lv-'+key+'">'+esc(def[1])+'</span>'+
+'<span class="rd-combo">'+esc(code)+' · probabilidade '+esc(p)+' ('+esc(probTermo)+')'+
+' × severidade '+esc(s)+' ('+esc(sevTermo)+')</span></p>'+
+'<p class="rd-text">'+esc(def[3])+'</p>'+
+'<p class="rd-src">IS nº E94-003 Rev. A, item 4.1.5 — classificações desta faixa: '+esc(def[2])+'</p>';
+desc.hidden = false;
+} else {
+desc.hidden = true; desc.innerHTML = '';
+}
 const aut = div.querySelector('.f-aut');
 if (!aut.value.trim()) aut.value = AUTH[label] || '';
 updateStatus();
@@ -1971,27 +2024,6 @@ renderConfigView(); renderUaSelect();
 };
 reader.readAsText(file);
 });
-const PROB_DEF = {
-5:'É provável que ocorra muitas vezes, ou historicamente tem ocorrido frequentemente.',
-4:'É provável que ocorra algumas vezes, ou historicamente tem ocorrido com pouca frequência.',
-3:'É improvável, mas é possível que venha a ocorrer, ou ocorre raramente.',
-2:'É bastante improvável que ocorra e não se tem notícia de que tenha alguma vez ocorrido.',
-1:'É quase impossível que o evento ocorra.'
-};
-const SEV_DEF = {
-A:'Morte de múltiplas pessoas.',
-B:'Morte de pessoa, lesões gravíssimas, capazes de deixar sequelas significativas e/ou incapacitantes (cegueira, paralisia, amputações).',
-C:'Lesões sérias a pessoas, mas não incapacitantes nem com sequelas significativas.',
-D:'Incidentes menores, danos a objetos, animais ou vegetação no solo, lesões leves.',
-E:'Somente danos ao equipamento.'
-};
-const TOLER_DEF = [
-['extremo','Risco extremo','4A, 5A, 5B','A operação não deve ocorrer e, caso esteja ocorrendo, deve cessar imediatamente, enquanto persistir a condição ou até que medidas mitigadoras suficientes reduzam o risco a nível aceitável. Caso ainda se decida prosseguir, controles preventivos devem estar em vigor e a aprovação da hierarquia mais alta deve ser requerida.'],
-['alto','Alto risco','3A, 4B, 5C','A operação não deveria ocorrer e, caso esteja ocorrendo, deveria cessar imediatamente. Caso se decida prosseguir, controles preventivos devem estar em vigor e a aprovação da hierarquia de gestão (gerente ou diretor) deve ser requerida.'],
-['moderado','Risco moderado','1A, 2A, 2B, 3B, 3C, 4C, 4D, 5D, 5E','A operação pode ocorrer com controles preventivos de mitigação estabelecidos e em vigor, conforme necessários. Operações neste nível deveriam ser aprovadas pelo nível hierárquico imediatamente superior (chefia imediata).'],
-['baixo','Baixo risco','1B, 1C, 2C, 2D, 3D, 3E, 4E','A operação pode ocorrer. Controles preventivos de mitigação e aprovação pelo nível hierárquico imediatamente superior são opcionais.'],
-['muito-baixo','Risco muito baixo','1D, 1E, 2E','A operação é aceitável como concebida. Nenhum controle preventivo de mitigação e nenhuma aprovação é requerida para que ela ocorra.']
-];
 let normasRendered = false;
 function renderNormasView(){
 if (normasRendered) return;
@@ -2030,18 +2062,7 @@ $('docDialog').showModal();
 }));
 $('docDialog').addEventListener('close', () => { $('docFrame').src = 'about:blank'; });
 function renderSobreView(){
-$('cfgWhatsapp').value = CONFIG.whatsapp || '';
-const phone = String(CONFIG.whatsapp||'').replace(/\D/g,'');
-$('waField').hidden = !phone;
-if (phone){
-$('waLink').href = 'https://wa.me/'+phone;
-$('waLink').textContent = '+'+phone;
 }
-}
-$('cfgWhatsapp').addEventListener('change', () => {
-CONFIG.whatsapp = val('cfgWhatsapp');
-saveConfig(); renderSobreView();
-});
 document.querySelectorAll('#copyYear, .copyYear').forEach(el =>
 el.textContent = String(new Date().getFullYear()));
 $('dismissFirstRun').addEventListener('click', () => {
