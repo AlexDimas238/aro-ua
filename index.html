@@ -1492,7 +1492,6 @@ fieldFull('Legislação aplicável', data.legislacao);
 const q = data.qualificacao || {};
 if (q.tipoVoo) answerRow('Tipo de voo quanto à visada', q.tipoVoo, true);
 boolRow('O piloto tem Curso de Piloto de UA?', q.pilotoCurso);
-if (q.tipoVoo) boolRow('Operação com observador?', q.temObservador);
 boolRow('Vai voar sobre pessoas não anuentes?', q.sobreNaoAnuentes);
 if (q.sobreNaoAnuentes && q.medidasNaoAnuentes){
 fieldFull('Medidas de segurança adotadas para o voo sobre pessoas não anuentes', q.medidasNaoAnuentes);
