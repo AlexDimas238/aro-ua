@@ -907,25 +907,10 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 </div>
 </div>
 <p class="checkfoot" id="tipoVooDesc" hidden></p>
-<div class="qrow" id="rowObservador">
-<span class="qtext">Vai ter observador?</span>
-<div class="qopts">
-<label><input type="radio" name="qObservador" value="sim"> Sim</label>
-<label><input type="radio" name="qObservador" value="nao"> Não</label>
-</div>
-</div>
-<p class="checkfoot travado" id="obsTravado" hidden>
-Observador exigido pelo tipo de voo selecionado — resposta fixada em <strong>Sim</strong>.
-</p>
-<div class="qrow sub" id="rowObsCurso" hidden>
-<span class="qtext">O observador tem Curso de Piloto de UA?</span>
-<div class="qopts">
-<label><input type="radio" name="qObsCurso" value="sim"> Sim</label>
-<label><input type="radio" name="qObsCurso" value="nao"> Não</label>
-</div>
-</div>
 <p class="checkfoot">Nenhuma resposta é obrigatória. O que ficar em branco é
-registrado como <strong>Não</strong> no PDF. Para desmarcar, toque de novo na opção.</p>
+registrado como <strong>Não</strong> no PDF. Para desmarcar, toque de novo na opção.
+A necessidade de observador decorre do tipo de voo: EVLOS e BVLOS exigem,
+VLOS não.</p>
 </fieldset>
 <fieldset class="checktable">
 <legend>Operação sobre pessoas</legend>
@@ -1507,8 +1492,7 @@ fieldFull('Legislação aplicável', data.legislacao);
 const q = data.qualificacao || {};
 if (q.tipoVoo) answerRow('Tipo de voo quanto à visada', q.tipoVoo, true);
 boolRow('O piloto tem Curso de Piloto de UA?', q.pilotoCurso);
-boolRow('Vai ter observador?', q.temObservador);
-if (q.temObservador) boolRow('O observador tem Curso de Piloto de UA?', q.observadorCurso);
+if (q.tipoVoo) boolRow('Operação com observador?', q.temObservador);
 boolRow('Vai voar sobre pessoas não anuentes?', q.sobreNaoAnuentes);
 if (q.sobreNaoAnuentes && q.medidasNaoAnuentes){
 fieldFull('Medidas de segurança adotadas para o voo sobre pessoas não anuentes', q.medidasNaoAnuentes);
@@ -1951,11 +1935,9 @@ $('observacoes').value   = d.observacoes || '';
 $('responsavel').value   = d.responsavel != null ? d.responsavel : CONFIG.piloto.nome;
 const q = d.qualificacao || {};
 setResposta('qPilotoCurso', q.pilotoCurso);
-setResposta('qObservador',  q.temObservador);
+setResposta('qNaoAnuentes', q.sobreNaoAnuentes);
 tipoVoo = '';
 setTipoVoo(q.tipoVoo || '');
-setResposta('qObsCurso',    q.observadorCurso);
-setResposta('qNaoAnuentes', q.sobreNaoAnuentes);
 $('medidasNaoAnuentes').value = q.medidasNaoAnuentes || '';
 syncCondicionais();
 renderAcidenteChips();
@@ -2072,31 +2054,23 @@ function setTipoVoo(v){
 tipoVoo = (v === tipoVoo) ? '' : v;   // reclicar limpa
 $('tipoVoo').querySelectorAll('button').forEach(b =>
 b.setAttribute('aria-pressed', String(b.dataset.v === tipoVoo)));
-$('tipoVooDesc').textContent = TIPO_VOO[tipoVoo] || '';
+let desc = TIPO_VOO[tipoVoo] || '';
+if (desc) desc += exigeObservador() ? ' Exige observador.' : ' Não exige observador.';
+$('tipoVooDesc').textContent = desc;
 $('tipoVooDesc').hidden = !tipoVoo;
-const exige = TIPO_EXIGE_OBSERVADOR.includes(tipoVoo);
-const dispensa = tipoVoo === 'VLOS';
-if (exige) setResposta('qObservador', 'sim');
-if (dispensa) setResposta('qObservador', 'nao');
-$('rowObservador').hidden = dispensa;
-$('obsTravado').hidden = !exige;
-document.querySelectorAll('input[name="qObservador"]').forEach(r => { r.disabled = exige; });
-syncCondicionais();
 }
+function exigeObservador(){ return TIPO_EXIGE_OBSERVADOR.includes(tipoVoo); }
 $('tipoVoo').querySelectorAll('button').forEach(b =>
 b.addEventListener('click', () => setTipoVoo(b.dataset.v)));
 function syncCondicionais(){
-const temObs = resposta('qObservador') === 'sim';
-$('rowObsCurso').hidden = !temObs;
-if (!temObs) setResposta('qObsCurso', '');
 const naoAnuentes = resposta('qNaoAnuentes') === 'sim';
 $('rowMedidas').hidden = !naoAnuentes;
 if (naoAnuentes && !val('medidasNaoAnuentes')){
 $('medidasNaoAnuentes').value = EXEMPLO_MEDIDAS;
 }
 }
-['qPilotoCurso','qObsCurso'].forEach(n => ligarRespostas(n));
-['qObservador','qNaoAnuentes'].forEach(n => ligarRespostas(n, syncCondicionais));
+ligarRespostas('qPilotoCurso');
+ligarRespostas('qNaoAnuentes', syncCondicionais);
 function renderLevelRef(){
 $('levelRefBody').innerHTML =
 '<div><h3>Probabilidade</h3>'+
@@ -2460,7 +2434,7 @@ if (!riscos.length)   erros.push('• Inclua ao menos uma situação de risco co
 if (!sigDirty)        erros.push('• Assine no campo de assinatura.');
 if (erros.length){ alert('Faltam informações para gerar o PDF:\n\n'+erros.join('\n')); return null; }
 const dataIso = val('dataAvaliacao') || todayIso();
-const temObservador = resposta('qObservador') === 'sim' || TIPO_EXIGE_OBSERVADOR.includes(tipoVoo);
+const temObservador = exigeObservador();
 const sobreNaoAnuentes = resposta('qNaoAnuentes') === 'sim';
 return {
 dataAvaliacao: isoToBr(dataIso),
@@ -2474,7 +2448,6 @@ qualificacao: {
 tipoVoo,
 pilotoCurso: resposta('qPilotoCurso') === 'sim',
 temObservador,
-observadorCurso: temObservador && resposta('qObsCurso') === 'sim',
 sobreNaoAnuentes,
 medidasNaoAnuentes: sobreNaoAnuentes ? val('medidasNaoAnuentes') : ''
 },
@@ -2572,8 +2545,6 @@ responsavel: val('responsavel'),
 qualificacao: {
 tipoVoo,
 pilotoCurso: resposta('qPilotoCurso'),
-temObservador: resposta('qObservador'),
-observadorCurso: resposta('qObsCurso'),
 sobreNaoAnuentes: resposta('qNaoAnuentes'),
 medidasNaoAnuentes: val('medidasNaoAnuentes')
 },
