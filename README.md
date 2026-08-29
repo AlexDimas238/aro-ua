@@ -46,9 +46,9 @@ Para levar a ARO a campo, **salve a página, não o link**:
 São cerca de 110 KB num arquivo só. Abrindo esse arquivo direto do aparelho, sem rede nenhuma,
 o formulário, a matriz 5×5, a assinatura e a **geração do PDF funcionam normalmente**.
 
-Duas ressalvas nessa cópia salva:
+Importante:
 
-- **A aba Normas não abre.** Os três PDFs são arquivos separados. Baixe cada um pelos botões
+- **A aba Normas não abre sem conexão com a internet.** Os três PDFs são arquivos separados. Baixe cada um pelos botões
   *Baixar* enquanto estiver com internet, se quiser consultá-los depois.
 - **O histórico não é compartilhado com o site.** O navegador trata o endereço na internet e o
   arquivo local como dois armazenamentos distintos. Para levar suas AROs, UA cadastradas e
@@ -69,13 +69,13 @@ São atos normativos oficiais, reproduzidos sem alteração. Confirme sempre a v
 ## Aviso
 
 A ferramenta **auxilia** o registro e a classificação do risco. Ela **não autoriza nem impede**
-a realização de operação alguma — não há lógica de GO/NO-GO. A decisão de operar, a exatidão
+a realização de operação alguma — A decisão de operar, a exatidão
 das informações e o cumprimento da regulamentação são de responsabilidade exclusiva do piloto
 remoto, do operador e da autoridade competente.
 
 ## Licença
 
-Uso da aplicação livre e gratuito. Cópia, redistribuição, hospedagem em outro endereço e
+Uso da aplicação livre e gratuito. Cópia, hospedagem em outro endereço e
 modificação **não** são autorizadas — veja [LICENSE](LICENSE).
 
 Este repositório contém apenas o arquivo publicado. O código-fonte não é público.
