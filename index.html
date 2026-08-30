@@ -284,6 +284,31 @@ border-left:3px solid var(--blue-100);
 .uablock{padding:6px 14px 14px}
 .uablock > * + *{margin-top:14px}
 .uablock .actions{margin-top:14px}
+.uapicker{display:flex;gap:9px;align-items:stretch}
+.uapicker select{flex:1;min-width:0}
+.uapicker .btn{flex:none;white-space:nowrap;padding:9px 14px;min-height:0}
+.ualist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r-sm)}
+.ualist li{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:9px 11px;
+border-bottom:1px solid var(--line);
+font-size:13.5px;
+color:var(--ink-soft);
+}
+.ualist li:last-child{border-bottom:0}
+.ualist-txt{min-width:0;overflow-wrap:anywhere}
+.ualist-vazio{color:var(--muted);font-style:italic}
+.uasub{
+margin:0;
+font-size:12px;
+font-weight:700;
+color:var(--ink-soft);
+border-top:1px solid var(--line);
+padding-top:14px;
+}
 .chipsetlabel{margin:12px 0 7px;font-size:11.5px;font-weight:700;color:var(--ink-soft)}
 .chipset{display:flex;flex-wrap:wrap;gap:7px}
 .optchip{
@@ -722,6 +747,10 @@ padding:4px 16px 8px;
 .qrow{flex-direction:column;align-items:stretch;gap:9px}
 .qopts label{flex:1;justify-content:center}
 .segmented button{flex:1;padding:9px 6px}
+.uapicker{flex-direction:column}
+.uapicker .btn{width:100%;min-height:44px}
+.ualist li{align-items:flex-start;flex-direction:column;gap:8px}
+.ualist .btn-remove{align-self:flex-end}
 .levelref-body{grid-template-columns:1fr;gap:16px}
 .lvrow{flex-direction:column;gap:3px}
 .lvkey{min-width:0;align-self:flex-start}
@@ -812,9 +841,17 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 <fieldset class="checktable uablock">
 <legend>Aeronave não tripulada (UA)</legend>
 <div class="field" id="uaSelectWrap" hidden>
-<label for="uaSelect">Carregar UA já cadastrada</label>
+<label for="uaSelect">Adicionar UA já cadastrada</label>
+<div class="uapicker">
 <select id="uaSelect"><option value="">— selecionar —</option></select>
+<button type="button" class="btn btn-ghost" id="uaTodas">Adicionar todas</button>
 </div>
+</div>
+<div class="field">
+<label>UA desta ARO</label>
+<ul class="ualist" id="uaLista"></ul>
+</div>
+<p class="uasub">Adicionar uma UA que não está cadastrada</p>
 <div class="grid3">
 <div class="field">
 <label for="uaIdent">Identificação</label>
@@ -840,13 +877,14 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 </div>
 </div>
 <div class="actions">
-<button type="button" class="btn btn-ghost" id="uaSalvar">Salvar no meu cadastro</button>
-<button type="button" class="btn btn-ghost" id="uaAcrescentar">+ Acrescentar outra UA</button>
+<button type="button" class="btn btn-primary" id="uaAdicionar">+ Adicionar à ARO</button>
+<button type="button" class="btn btn-ghost" id="uaSalvar">Adicionar e salvar no cadastro</button>
 </div>
 <div class="field" style="margin-top:14px">
 <label for="aeronaves">Aeronave(s) — como sairá no PDF</label>
-<input id="aeronaves" placeholder="Preenchido pelos campos acima">
-<div class="hint">Montado automaticamente. Você pode editar ou acrescentar mais de uma UA.</div>
+<input id="aeronaves" placeholder="Adicione ao menos uma UA acima">
+<div class="hint">Montado a partir da lista. Você pode ajustar o texto à mão —
+mexer na lista o reescreve.</div>
 </div>
 </fieldset>
 <div class="field">
@@ -964,7 +1002,7 @@ offline. São atos normativos públicos, reproduzidos na íntegra e sem alteraç
 </p>
 <div class="doc">
 <div class="doc-info">
-<h3>RBAC 100 — ANAC</h3>
+<h3>RBAC-E nº 94 / RBAC 100 — ANAC</h3>
 <p>Requisitos gerais para aeronaves não tripuladas e aeromodelos. É a norma que exige a
 ARO atualizada nos últimos 12 meses (§ E94.103(f)(2) e (g)(2)).</p>
 <span class="tag">PDF · 19 páginas · 389 KB</span>
@@ -1394,7 +1432,7 @@ function header(){
 csRect(page, 0, 0, PAGE_W, H_HEADER, BLUE_DARK);
 csLogo(page, MARGIN, 11, 24, [255,255,255]);
 csText(page, MARGIN+32, 20, 'Avaliação de Risco Operacional', 13, true, [255,255,255]);
-csText(page, MARGIN+32, 33, 'Em cumprimento ao parágrafo 100.5(a)(1) do RBAC nº 100 da ANAC',
+csText(page, MARGIN+32, 33, 'Em cumprimento ao parágrafo E94.103(f)(2) ou E94.103(g)(2) do RBAC-E nº 94 da ANAC',
 7, false, [198,220,243]);
 if (pageNo > 1) csTextRight(page, PAGE_W-MARGIN, 20, 'continuação', 8, false, [198,220,243]);
 return H_HEADER + 12;
@@ -1450,9 +1488,9 @@ sectionTitle('1. Identificação');
 fieldsRow2('Data da avaliação', data.dataAvaliacao, 'Válida até', data.validade);
 fieldsRow2('Operador / piloto remoto', data.piloto.nome, 'CPF ou CNPJ', data.piloto.cpf);
 fieldsRow2('SARPAS', data.piloto.sarpas, 'Aeronave(s)', data.aeronaves);
-const ua = data.ua || {};
-if (ua.registro || ua.numeroSerie){
-fieldsRow2('Registro (SISANT)', ua.registro, 'Número de série', ua.numeroSerie);
+const uas = data.uas || (data.ua ? [data.ua] : []);
+if (uas.length === 1 && (uas[0].registro || uas[0].numeroSerie)){
+fieldsRow2('Registro (SISANT)', uas[0].registro, 'Número de série', uas[0].numeroSerie);
 }
 fieldFull('Cenário operacional', data.cenario);
 sectionTitle('2. Aspectos gerais');
@@ -1888,13 +1926,14 @@ $('validade').value      = d.validade || addMonthsIso($('dataAvaliacao').value, 
 $('pilotoNome').value    = d.pilotoNome   != null ? d.pilotoNome   : CONFIG.piloto.nome;
 $('pilotoCpf').value     = d.pilotoCpf    != null ? d.pilotoCpf    : CONFIG.piloto.cpf;
 $('pilotoSarpas').value  = d.pilotoSarpas != null ? d.pilotoSarpas : CONFIG.piloto.sarpas;
-const ua = d.ua || {};
-$('uaIdent').value = ua.identificacao || '';
-$('uaFab').value   = ua.fabricante || '';
-$('uaMod').value   = ua.modelo || '';
-$('uaReg').value   = ua.registro || '';
-$('uaSerie').value = ua.numeroSerie || '';
-$('aeronaves').value     = d.aeronaves || '';
+UAS_ARO = Array.isArray(d.uas) ? d.uas.map(u => Object.assign({}, u)) : [];
+limparUaCampos();
+renderUaLista();
+comporAeronaves();
+if (d.aeronaves && d.aeronaves !== $('aeronaves').value){
+$('aeronaves').value = d.aeronaves;
+aeronavesTocado = true;
+}
 $('cenario').value       = d.cenario || '';
 $('legislacao').value    = d.legislacao || DEFAULT_LEGISLACAO;
 $('acidente').value      = d.acidente || '';
@@ -1926,67 +1965,100 @@ $('validade').value = addMonthsIso(base, CONFIG.validadeMeses);
 $('validadeHint').textContent = CONFIG.validadeMeses + ' meses a partir da data da avaliação. Pode ser editada.';
 }
 const UA_CAMPOS = ['uaIdent','uaFab','uaMod','uaReg','uaSerie'];
+let UAS_ARO = [];
 function renderUaSelect(){
 $('uaSelectWrap').hidden = UAS.length === 0;
 $('uaSelect').innerHTML = '<option value="">— selecionar —</option>' +
 UAS.map(u => '<option value="'+esc(u.id)+'">'+
 esc([u.identificacao,u.fabricante,u.modelo].filter(Boolean).join(' — '))+'</option>').join('');
 }
-$('uaSelect').addEventListener('change', function(){
-const u = UAS.find(x => x.id === this.value);
-this.value = '';
-if (!u) return;
-$('uaIdent').value = u.identificacao || '';
-$('uaFab').value   = u.fabricante || '';
-$('uaMod').value   = u.modelo || '';
-$('uaReg').value   = u.registro || '';
-$('uaSerie').value = u.numeroSerie || '';
-$('aeronaves').value = uaTexto();
-updateStatus();
-});
 function lerUaCampos(){
 return {
 identificacao: val('uaIdent'), fabricante: val('uaFab'), modelo: val('uaMod'),
 registro: val('uaReg'), numeroSerie: val('uaSerie')
 };
 }
+function limparUaCampos(){ UA_CAMPOS.forEach(id => { $(id).value = ''; }); }
+function uaVazia(u){ return !u.identificacao && !u.modelo && !u.registro && !u.numeroSerie; }
 function uaTexto(u){
-u = u || lerUaCampos();
 const nome = [u.identificacao, u.fabricante, u.modelo].filter(Boolean).join(' ');
 const extra = [];
 if (u.registro) extra.push('Registro ' + u.registro);
 if (u.numeroSerie) extra.push('S/N ' + u.numeroSerie);
 return [nome, extra.join(', ')].filter(Boolean).join(' — ');
 }
-let aeronavesTocado = false;
-$('aeronaves').addEventListener('input', () => { aeronavesTocado = true; updateStatus(); });
-UA_CAMPOS.forEach(id => $(id).addEventListener('input', () => {
-if (!aeronavesTocado) { $('aeronaves').value = uaTexto(); updateStatus(); }
-}));
-$('uaSalvar').addEventListener('click', () => {
-const u = lerUaCampos();
-if (!u.identificacao && !u.modelo){
-alert('Preencha ao menos a identificação ou o modelo da UA antes de salvar.');
+function renderUaLista(){
+const ul = $('uaLista');
+if (!UAS_ARO.length){
+ul.innerHTML = '<li class="ualist-vazio">Nenhuma UA adicionada ainda.</li>';
 return;
 }
+ul.innerHTML = UAS_ARO.map((u,i) =>
+'<li><span class="ualist-txt">'+esc(uaTexto(u))+'</span>'+
+'<button type="button" class="btn-remove" data-i="'+i+'">Remover</button></li>').join('');
+ul.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => {
+UAS_ARO.splice(Number(b.dataset.i), 1);
+renderUaLista();
+comporAeronaves();
+}));
+}
+function comporAeronaves(){
+aeronavesTocado = false;
+$('aeronaves').value = UAS_ARO.map(uaTexto).join('; ');
+updateStatus();
+}
+function jaNaAro(u){
+return UAS_ARO.some(x => uaTexto(x).toLowerCase() === uaTexto(u).toLowerCase());
+}
+function adicionarUa(u, silencioso){
+if (uaVazia(u)){
+if (!silencioso) alert('Preencha ao menos a identificação, o modelo ou o registro da UA.');
+return false;
+}
+if (jaNaAro(u)){
+if (!silencioso) alert('Esta UA já está na lista desta ARO.');
+return false;
+}
+UAS_ARO.push(u);
+renderUaLista();
+comporAeronaves();
+return true;
+}
+$('uaSelect').addEventListener('change', function(){
+const u = UAS.find(x => x.id === this.value);
+this.value = '';
+if (u) adicionarUa(Object.assign({}, u));
+});
+$('uaTodas').addEventListener('click', () => {
+const antes = UAS_ARO.length;
+UAS.forEach(u => adicionarUa(Object.assign({}, u), true));
+const novas = UAS_ARO.length - antes;
+if (!novas) alert('Todas as UA cadastradas já estão nesta ARO.');
+});
+$('uaAdicionar').addEventListener('click', () => {
+if (adicionarUa(lerUaCampos())){
+limparUaCampos();
+$('uaIdent').focus();
+}
+});
+$('uaSalvar').addEventListener('click', () => {
+const u = lerUaCampos();
+if (!adicionarUa(u)) return;
 const igual = UAS.find(x =>
 x.identificacao === u.identificacao && x.modelo === u.modelo && x.registro === u.registro);
-if (igual){ alert('Esta UA já está no seu cadastro.'); return; }
+if (igual){
+alert('UA adicionada à ARO. Ela já constava do seu cadastro.');
+} else {
 UAS.push(Object.assign({id: uid('ua')}, u));
 saveUas();
 renderUaSelect();
-alert('UA salva no cadastro deste aparelho.');
-});
-$('uaAcrescentar').addEventListener('click', () => {
-const txt = uaTexto();
-if (!txt){ alert('Preencha os dados da UA antes de acrescentar.'); return; }
-const cur = $('aeronaves').value.trim();
-aeronavesTocado = true;
-$('aeronaves').value = cur && cur !== txt ? cur + '; ' + txt : txt;
-UA_CAMPOS.forEach(id => { $(id).value = ''; });
+alert('UA adicionada à ARO e salva no cadastro deste aparelho.');
+}
+limparUaCampos();
 $('uaIdent').focus();
-updateStatus();
 });
+let aeronavesTocado = false;
+$('aeronaves').addEventListener('input', () => { aeronavesTocado = true; updateStatus(); });
 function resposta(nome){
 const m = document.querySelector('input[name="'+nome+'"]:checked');
 return m ? m.value : '';
@@ -2398,7 +2470,7 @@ return {
 dataAvaliacao: isoToBr(dataIso),
 validade: isoToBr(val('validade')),
 piloto: {nome, cpf: val('pilotoCpf'), sarpas: val('pilotoSarpas')},
-ua: lerUaCampos(),
+uas: UAS_ARO.map(u => Object.assign({}, u)),
 aeronaves: val('aeronaves'),
 cenario: val('cenario'),
 legislacao: val('legislacao') || DEFAULT_LEGISLACAO,
@@ -2496,7 +2568,7 @@ $('saveDraft').addEventListener('click', () => {
 const ok = LS.set('aro_draft', {
 dataAvaliacao: val('dataAvaliacao'), validade: val('validade'),
 pilotoNome: val('pilotoNome'), pilotoCpf: val('pilotoCpf'), pilotoSarpas: val('pilotoSarpas'),
-ua: lerUaCampos(),
+uas: UAS_ARO.map(u => Object.assign({}, u)),
 aeronaves: val('aeronaves'), cenario: val('cenario'), legislacao: val('legislacao'),
 acidente: val('acidente'), observacoes: val('observacoes'),
 responsavel: val('responsavel'),
