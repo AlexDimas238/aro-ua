@@ -968,9 +968,10 @@ pela matriz 5×5 da IS nº E94-003A. Inclua quantas situações forem necessári
 <input id="responsavel">
 </div>
 <div class="field">
-<label for="sig">Assinatura</label>
+<label for="sig">Assinatura (opcional)</label>
 <canvas id="sig" class="sig" aria-label="Área de assinatura: desenhe com o dedo ou o mouse"></canvas>
-<div class="hint">Assine com o dedo (celular/tablet) ou com o mouse.</div>
+<div class="hint">Assine com o dedo ou o mouse, ou deixe em branco para assinar
+depois — digitalmente no arquivo ou à mão, no impresso.</div>
 <div class="actions">
 <button type="button" class="btn btn-ghost" id="clearSig">Limpar assinatura</button>
 </div>
@@ -1708,13 +1709,15 @@ const MATRIX = {
 '3A':['Alto risco','alto'],         '3B':['Risco moderado','moderado'],'3C':['Risco moderado','moderado'],'3D':['Baixo risco','baixo'],       '3E':['Baixo risco','baixo'],
 '2A':['Risco moderado','moderado'], '2B':['Risco moderado','moderado'],'2C':['Baixo risco','baixo'],      '2D':['Baixo risco','baixo'],       '2E':['Risco muito baixo','muito-baixo'],
 '1A':['Risco moderado','moderado'], '1B':['Baixo risco','baixo'],      '1C':['Baixo risco','baixo'],      '1D':['Risco muito baixo','muito-baixo'],'1E':['Risco muito baixo','muito-baixo']};
-const AUTH = {
-'Risco extremo':'Hierarquia mais alta',
-'Alto risco':'Gerente ou Diretor',
-'Risco moderado':'Chefia imediata',
-'Baixo risco':'Chefia imediata (opcional)',
-'Risco muito baixo':'Não requerida'
-};
+const RESPONSAVEL_PADRAO = 'Piloto remoto';
+const RESPONSAVEIS = [
+RESPONSAVEL_PADRAO,
+'Chefia imediata',
+'Gerente ou Diretor',
+'Hierarquia mais alta',
+'Coordenador da operação',
+'Autoridade requisitante'
+];
 const PROBS = [[5,'Frequente'],[4,'Ocasional'],[3,'Remoto'],[2,'Improvável'],[1,'Muito improvável']];
 const SEVS  = [['A','Catastrófico'],['B','Crítico'],['C','Significativo'],['D','Pequeno'],['E','Insignificante']];
 const PROB_DEF = {
@@ -2119,28 +2122,36 @@ $('levelRef').open = LS.get('aro_levelref_aberto', true);
 $('levelRef').addEventListener('toggle', () =>
 LS.set('aro_levelref_aberto', $('levelRef').open));
 }
-function renderAcidenteChips(){
-const box = $('acidenteOpcoes');
-box.innerHTML = ORGAOS_ACIDENTE.map(([rotulo, texto], i) =>
-'<button type="button" class="optchip" data-i="'+i+'" aria-pressed="false">'+esc(rotulo)+'</button>').join('');
+function rotuloChip(o){ return Array.isArray(o) ? o[0] : o; }
+function textoChip(o){ return Array.isArray(o) ? o[1] : o; }
+function ligarChips(box, campo, opcoes){
+box.dataset.opcoes = JSON.stringify(opcoes);
+box.innerHTML = opcoes.map((o,i) =>
+'<button type="button" class="optchip" data-i="'+i+'" aria-pressed="false">'+
+esc(rotuloChip(o))+'</button>').join('');
 box.querySelectorAll('.optchip').forEach(b => b.addEventListener('click', () => {
-const texto = ORGAOS_ACIDENTE[Number(b.dataset.i)][1];
-const partes = val('acidente').split(';').map(s => s.trim()).filter(Boolean);
+const texto = textoChip(opcoes[Number(b.dataset.i)]);
+const partes = campo.value.split(';').map(x => x.trim()).filter(Boolean);
 const at = partes.indexOf(texto);
 if (at >= 0) partes.splice(at, 1); else partes.push(texto);
-$('acidente').value = partes.join('; ');
-sincronizarAcidenteChips();
+campo.value = partes.join('; ');
+sincronizarChips(box, campo);
 }));
-sincronizarAcidenteChips();
+if (!campo.dataset.chipsLigado){
+campo.dataset.chipsLigado = '1';
+campo.addEventListener('input', () => sincronizarChips(box, campo));
 }
-function sincronizarAcidenteChips(){
-const atual = val('acidente');
-$('acidenteOpcoes').querySelectorAll('.optchip').forEach(b => {
-const texto = ORGAOS_ACIDENTE[Number(b.dataset.i)][1];
-b.setAttribute('aria-pressed', String(atual.includes(texto)));
-});
+sincronizarChips(box, campo);
 }
-$('acidente').addEventListener('input', sincronizarAcidenteChips);
+function sincronizarChips(box, campo){
+const opcoes = JSON.parse(box.dataset.opcoes || '[]');
+box.querySelectorAll('.optchip').forEach(b =>
+b.setAttribute('aria-pressed',
+String(campo.value.includes(textoChip(opcoes[Number(b.dataset.i)])))));
+}
+function renderAcidenteChips(){
+ligarChips($('acidenteOpcoes'), $('acidente'), ORGAOS_ACIDENTE);
+}
 let riskSeq = 0;
 function matrixHtml(){
 const head = '<tr><th class="corner">Prob. \\ Sev.</th>' +
@@ -2190,7 +2201,9 @@ SEVS.map(s => '<button type="button" class="chip" data-v="'+s[0]+'" aria-pressed
 '</div>'+
 '<div class="riskdesc f-desc" hidden></div>'+
 '<div class="field" style="margin-top:14px"><label>Nível hierárquico de autorização da operação</label>'+
-'<input class="f-aut" placeholder="Sugerido conforme a classificação"></div>'+
+'<input class="f-aut">'+
+'<p class="chipsetlabel">Toque para incluir ou remover:</p>'+
+'<div class="chipset autchips"></div></div>'+
 '<div class="field" style="margin-top:14px"><label>Medidas de mitigação do risco</label>'+
 '<textarea class="f-mit" placeholder="O que será feito para reduzir a probabilidade ou a severidade"></textarea>'+
 '<p class="chipsetlabel">Sugestões — toque para incluir ou remover:</p>'+
@@ -2199,7 +2212,8 @@ SEVS.map(s => '<button type="button" class="chip" data-v="'+s[0]+'" aria-pressed
 $('risks').appendChild(div);
 div.dataset.prob = seed.probNivel || '';
 div.dataset.sev  = seed.sevNivel  || '';
-if (seed.autorizacao) div.querySelector('.f-aut').value = seed.autorizacao;
+div.querySelector('.f-aut').value = seed.autorizacao || RESPONSAVEL_PADRAO;
+ligarChips(div.querySelector('.autchips'), div.querySelector('.f-aut'), RESPONSAVEIS);
 if (seed.mitigacao)   div.querySelector('.f-mit').value = seed.mitigacao;
 div.querySelector('.matrixbox').open = window.matchMedia('(min-width:821px)').matches;
 div.querySelector('[data-remove]').addEventListener('click', () => {
@@ -2225,7 +2239,6 @@ div.querySelector('.f-situacao').addEventListener('input', () => {
 renderMitChips(div);
 updateStatus();
 });
-div.querySelector('.f-mit').addEventListener('input', () => syncMitChips(div));
 renderMitChips(div);
 syncRisk(div);
 renumberRisks();
@@ -2272,8 +2285,6 @@ desc.hidden = false;
 } else {
 desc.hidden = true; desc.innerHTML = '';
 }
-const aut = div.querySelector('.f-aut');
-if (!aut.value.trim()) aut.value = AUTH[label] || '';
 updateStatus();
 }
 function mitigacoesSugeridas(div){
@@ -2284,28 +2295,7 @@ const doCatalogo = (cat && cat.mitigacoes) ? [cat.mitigacoes] : [];
 return especificas.concat(doCatalogo, MITIGACOES_GERAIS);
 }
 function renderMitChips(div){
-const box = div.querySelector('.mitchips');
-const opcoes = mitigacoesSugeridas(div);
-box.dataset.opcoes = JSON.stringify(opcoes);
-box.innerHTML = opcoes.map((t,i) =>
-'<button type="button" class="optchip" data-i="'+i+'" aria-pressed="false">'+esc(t)+'</button>').join('');
-box.querySelectorAll('.optchip').forEach(b => b.addEventListener('click', () => {
-const texto = opcoes[Number(b.dataset.i)];
-const campo = div.querySelector('.f-mit');
-const partes = campo.value.split(';').map(s => s.trim()).filter(Boolean);
-const at = partes.indexOf(texto);
-if (at >= 0) partes.splice(at, 1); else partes.push(texto);
-campo.value = partes.join('; ');
-syncMitChips(div);
-}));
-syncMitChips(div);
-}
-function syncMitChips(div){
-const box = div.querySelector('.mitchips');
-const opcoes = JSON.parse(box.dataset.opcoes || '[]');
-const atual = div.querySelector('.f-mit').value;
-box.querySelectorAll('.optchip').forEach(b =>
-b.setAttribute('aria-pressed', String(atual.includes(opcoes[Number(b.dataset.i)]))));
+ligarChips(div.querySelector('.mitchips'), div.querySelector('.f-mit'), mitigacoesSugeridas(div));
 }
 function setupSuggestions(div){
 const input = div.querySelector('.f-situacao');
@@ -2348,7 +2338,7 @@ situacao,
 probNivel: p, probTermo: (PROBS.find(x => String(x[0]) === String(p)) || [,''])[1],
 sevNivel:  s, sevTermo:  (SEVS.find(x => x[0] === s) || ['',''])[1],
 classificacao: code, tolerabilidade: label, corKey: key,
-autorizacao: div.querySelector('.f-aut').value.trim() || AUTH[label] || '',
+autorizacao: div.querySelector('.f-aut').value.trim() || RESPONSAVEL_PADRAO,
 mitigacao:   div.querySelector('.f-mit').value.trim()
 };
 }).filter(Boolean);
@@ -2361,10 +2351,10 @@ if (!val('pilotoNome')) falta.push('nome do piloto');
 if (!val('aeronaves'))  falta.push('UA');
 if (!val('cenario'))    falta.push('cenário');
 if (!ok)                falta.push('situação de risco completa');
-if (!sigDirty)          falta.push('assinatura');
 $('formStatus').innerHTML = falta.length
 ? '<b>'+ok+' de '+total+'</b> situação(ões) prontas · falta: '+esc(falta.join(', '))
-: '<b>Pronto para gerar.</b> '+ok+' situação(ões) de risco avaliada(s).';
+: '<b>Pronto para gerar'+(sigDirty ? '.' : ' — sem assinatura.')+'</b> '+
+ok+' situação(ões) de risco avaliada(s).';
 }
 ['pilotoNome','aeronaves','cenario'].forEach(id => $(id).addEventListener('input', updateStatus));
 let sigDirty = false, sigCanvas, sigCtx;
@@ -2461,7 +2451,6 @@ if (!nome)            erros.push('• Informe o nome do piloto remoto.');
 if (!val('aeronaves'))erros.push('• Informe ao menos uma UA.');
 if (!val('cenario'))  erros.push('• Informe o cenário operacional.');
 if (!riscos.length)   erros.push('• Inclua ao menos uma situação de risco completa (situação + probabilidade + severidade).');
-if (!sigDirty)        erros.push('• Assine no campo de assinatura.');
 if (erros.length){ alert('Faltam informações para gerar o PDF:\n\n'+erros.join('\n')); return null; }
 const dataIso = val('dataAvaliacao') || todayIso();
 const temObservador = exigeObservador();
@@ -2490,18 +2479,17 @@ _iso: {dataAvaliacao: dataIso, validade: val('validade')}
 };
 }
 function buildPdf(data, sigSource){
-const sigBytes = rawRgbFrom(sigSource, SIG_W, SIG_H);
+const sig = sigSource
+? {width: SIG_W, height: SIG_H, bytes: rawRgbFrom(sigSource, SIG_W, SIG_H)}
+: null;
 const front = AroPdf.buildFrontPages(data);
 const verso = AroPdf.buildVersoPage({
 responsavel: data.responsavel,
 dataAssinatura: data.dataAvaliacao,
 validade: data.validade,
-signature: {width: SIG_W, height: SIG_H}
+signature: sig ? {width: SIG_W, height: SIG_H} : null
 });
-return AroPdf.pagesToPdf(front, {
-page: verso.page,
-signature: {width: SIG_W, height: SIG_H, bytes: sigBytes}
-});
+return AroPdf.pagesToPdf(front, {page: verso.page, signature: sig});
 }
 function download(filename, bytes){
 try{
@@ -2533,17 +2521,21 @@ alert('Não foi possível baixar automaticamente. Use o botão de download/compa
 $('generate').addEventListener('click', () => {
 const data = gatherFormData();
 if (!data) return;
+if (!sigDirty && !confirm(
+'A ARO ainda não foi assinada na tela.\n\n' +
+'Gerar o PDF sem assinatura? Você poderá assiná-lo digitalmente ou imprimir e ' +
+'assinar à mão.')) return;
 const btn = $('generate');
 btn.disabled = true; btn.textContent = 'Gerando…';
 setTimeout(() => {
 try{
-const bytes = buildPdf(data, sigCanvas);
+const bytes = buildPdf(data, sigDirty ? sigCanvas : null);
 const filename = 'ARO_'+data._iso.dataAvaliacao+'_'+safeName(data.piloto.nome)+'.pdf';
 const baixou = download(filename, bytes);
 const record = Object.assign({}, data, {
 id: uid('aro'),
 criadoEm: new Date().toISOString(),
-signatureDataUrl: signatureThumb()
+signatureDataUrl: sigDirty ? signatureThumb() : null
 });
 const hist = loadHistorico();
 hist.unshift(record);
@@ -2605,10 +2597,9 @@ renderHistorico();
 function regenerate(id){
 const rec = loadHistorico().find(r => r.id === id);
 if (!rec) return;
-const img = new Image();
-img.onload = () => {
+const emitir = (fonte) => {
 try{
-const bytes = buildPdf(rec, img);
+const bytes = buildPdf(rec, fonte);
 const iso = (rec._iso && rec._iso.dataAvaliacao) ||
 String(rec.dataAvaliacao||'').split('/').reverse().join('-');
 showPdf(bytes, 'ARO_'+iso+'_'+safeName(rec.piloto.nome)+'.pdf', null);
@@ -2617,6 +2608,9 @@ console.error(e);
 alert('Não foi possível regenerar este PDF.');
 }
 };
+if (!rec.signatureDataUrl){ emitir(null); return; }
+const img = new Image();
+img.onload = () => emitir(img);
 img.onerror = () => alert('Assinatura do registro não pôde ser lida.');
 img.src = rec.signatureDataUrl;
 }
