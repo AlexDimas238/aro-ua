@@ -1348,7 +1348,7 @@ if (typeof window !== 'undefined') window.PDFCore = PDFCoreExports;
 (function(){
 const { wrapText, textWidth, ByteBuf, pdfEscape, PDFDoc, sanitizeLatin1 } = (typeof module !== 'undefined') ? require('./pdfcore.js') : window.PDFCore;
 const PAGE_W = 595, PAGE_H = 842, MARGIN = 40, CW = PAGE_W - MARGIN*2;
-const CREDIT_LINE = 'ARO UA — Desenvolvido por Alexandre Dimas — © ' + new Date().getFullYear();
+const CREDIT_LINE = 'https://alexdimas238.github.io/aro-ua/';
 const BLUE_DARK = [6,59,112], BLUE = [11,79,138], BLUE_BG = [234,242,251], TEXT = [23,32,42], GRAY = [71,85,105], LINE = [216,224,234];
 const RISK_COLORS = {
 'extremo':      {bg:[220,38,38],  fg:[255,255,255], label:'Risco extremo'},
