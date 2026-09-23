@@ -882,15 +882,41 @@ o histórico se perde: use <em>Configurações → Backup</em> de vez em quando.
 </div>
 <div class="field" style="margin-top:14px">
 <label for="aeronaves">Aeronave(s) — como sairá no PDF</label>
-<input id="aeronaves" placeholder="Adicione ao menos uma UA acima">
-<div class="hint">Montado a partir da lista. Você pode ajustar o texto à mão —
-mexer na lista o reescreve.</div>
+<textarea id="aeronaves" rows="3" placeholder="Adicione ao menos uma UA acima"></textarea>
+<div class="hint">Uma UA por linha. Montado a partir da lista — você pode ajustar o
+texto à mão, mas mexer na lista o reescreve.</div>
 </div>
 </fieldset>
 <div class="field">
 <label for="cenario">Cenário operacional</label>
 <input id="cenario" placeholder="Ex.: Levantamento aéreo em área urbana — Bairro Centro, Vitória/ES">
 </div>
+<fieldset class="checktable uablock">
+<legend>Endereço</legend>
+<div class="field">
+<label for="endLogradouro">Logradouro</label>
+<input id="endLogradouro" autocomplete="street-address" placeholder="Ex.: Av. Jerônimo Monteiro, 1000 — Centro">
+</div>
+<div class="grid2">
+<div class="field">
+<label for="endCidade">Cidade</label>
+<input id="endCidade" autocomplete="address-level2" placeholder="Ex.: Vitória">
+</div>
+<div class="field">
+<label for="endUf">UF</label>
+<select id="endUf">
+<option value="">— selecionar —</option>
+<option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+<option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+<option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+<option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+<option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+<option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+<option>SP</option><option>SE</option><option>TO</option>
+</select>
+</div>
+</div>
+</fieldset>
 </div>
 </div>
 <div class="card">
@@ -1426,6 +1452,9 @@ const F_LABEL = 6.5;      // rótulo do campo
 const F_BODY  = 8.5;      // valor do campo
 const LH      = 10;       // entrelinha
 const GAP     = 4;        // respiro abaixo de cada campo
+function splitAeronaves(txt){
+return String(txt||'').split(/\r?\n|;/).map(s => s.trim()).filter(Boolean);
+}
 function buildFrontPages(data){
 const pages = [];
 let page, cursorY, pageNo = 0;
@@ -1473,6 +1502,25 @@ csText(page, MARGIN, cursorY+6, label.toUpperCase(), F_LABEL, true, GRAY);
 lines.forEach((l,i)=> csText(page, MARGIN, cursorY+16+i*LH, l, F_BODY, false, TEXT));
 cursorY += h;
 }
+function fieldHalf(label, val){
+const w = (CW-10)/2;
+const lines = wrapText(val||'—', F_BODY, false, w);
+const h = 9 + lines.length*LH + GAP;
+ensure(h);
+csText(page, MARGIN, cursorY+6, label.toUpperCase(), F_LABEL, true, GRAY);
+lines.forEach((l,i)=> csText(page, MARGIN, cursorY+16+i*LH, l, F_BODY, false, TEXT));
+cursorY += h;
+}
+function fieldLines(label, vals){
+const blocos = vals.map((v,i)=> wrapText((i+1)+'. '+v, F_BODY, false, CW-14));
+const h = 9 + blocos.reduce((n,b)=> n+b.length, 0)*LH + GAP;
+ensure(h);
+csText(page, MARGIN, cursorY+6, label.toUpperCase(), F_LABEL, true, GRAY);
+let n = 0;
+blocos.forEach(b => b.forEach((l,i)=>
+csText(page, MARGIN + (i ? 14 : 0), cursorY+16+(n++)*LH, l, F_BODY, false, TEXT)));
+cursorY += h;
+}
 function answerRow(label, answer, destaque){
 const lines = wrapText(label, F_BODY, false, CW - textWidth(answer, F_BODY, true) - 14);
 const h = lines.length*LH + 8;
@@ -1488,12 +1536,21 @@ newPage();
 sectionTitle('1. Identificação');
 fieldsRow2('Data da avaliação', data.dataAvaliacao, 'Válida até', data.validade);
 fieldsRow2('Operador / piloto remoto', data.piloto.nome, 'CPF ou CNPJ', data.piloto.cpf);
+const aeronaves = splitAeronaves(data.aeronaves);
+if (aeronaves.length > 1){
+fieldHalf('SARPAS', data.piloto.sarpas);
+fieldLines('Aeronaves', aeronaves);
+}else{
 fieldsRow2('SARPAS', data.piloto.sarpas, 'Aeronave(s)', data.aeronaves);
+}
 const uas = data.uas || (data.ua ? [data.ua] : []);
 if (uas.length === 1 && (uas[0].registro || uas[0].numeroSerie)){
 fieldsRow2('Registro (SISANT)', uas[0].registro, 'Número de série', uas[0].numeroSerie);
 }
 fieldFull('Cenário operacional', data.cenario);
+const end = data.endereco || {};
+fieldFull('Logradouro', end.logradouro);
+fieldsRow2('Cidade', end.cidade, 'UF', end.uf);
 sectionTitle('2. Aspectos gerais');
 fieldFull('Legislação aplicável', data.legislacao);
 const q = data.qualificacao || {};
@@ -1938,6 +1995,10 @@ $('aeronaves').value = d.aeronaves;
 aeronavesTocado = true;
 }
 $('cenario').value       = d.cenario || '';
+const end = d.endereco || {};
+$('endLogradouro').value = end.logradouro || '';
+$('endCidade').value     = end.cidade || '';
+$('endUf').value         = end.uf || '';
 $('legislacao').value    = d.legislacao || DEFAULT_LEGISLACAO;
 $('acidente').value      = d.acidente || '';
 $('observacoes').value   = d.observacoes || '';
@@ -2007,7 +2068,7 @@ comporAeronaves();
 }
 function comporAeronaves(){
 aeronavesTocado = false;
-$('aeronaves').value = UAS_ARO.map(uaTexto).join('; ');
+$('aeronaves').value = UAS_ARO.map(uaTexto).join('\n');
 updateStatus();
 }
 function jaNaAro(u){
@@ -2462,6 +2523,7 @@ piloto: {nome, cpf: val('pilotoCpf'), sarpas: val('pilotoSarpas')},
 uas: UAS_ARO.map(u => Object.assign({}, u)),
 aeronaves: val('aeronaves'),
 cenario: val('cenario'),
+endereco: {logradouro: val('endLogradouro'), cidade: val('endCidade'), uf: val('endUf')},
 legislacao: val('legislacao') || DEFAULT_LEGISLACAO,
 qualificacao: {
 tipoVoo,
@@ -2561,7 +2623,9 @@ const ok = LS.set('aro_draft', {
 dataAvaliacao: val('dataAvaliacao'), validade: val('validade'),
 pilotoNome: val('pilotoNome'), pilotoCpf: val('pilotoCpf'), pilotoSarpas: val('pilotoSarpas'),
 uas: UAS_ARO.map(u => Object.assign({}, u)),
-aeronaves: val('aeronaves'), cenario: val('cenario'), legislacao: val('legislacao'),
+aeronaves: val('aeronaves'), cenario: val('cenario'),
+endereco: {logradouro: val('endLogradouro'), cidade: val('endCidade'), uf: val('endUf')},
+legislacao: val('legislacao'),
 acidente: val('acidente'), observacoes: val('observacoes'),
 responsavel: val('responsavel'),
 qualificacao: {
